@@ -6,7 +6,7 @@
 ## Do as you will.
 ###
 
-ver = 2
+ver = 2.1
 
 import socket, select, signal, os, sys, atexit, re, json, getopt
 
@@ -36,11 +36,12 @@ def args():
 			confpath = a
 		elif o == "-v":
 			print "SCRD - Server Check Response Daemon"
-			print "Version %d" % ver
+			print "Version %.1f" % ver
 			sys.exit(0)
 def readConf(fn):
 	lconf = {'procs': [], 'white': []}
 	if not os.path.exists(fn):
+		print "Config file doesn't exist, exiting..."
 		sys.exit(1)
 	fh = open(fn, 'r')
 	lines = fh.readlines()
@@ -61,6 +62,7 @@ def rehash(signum, frm):
 	conf = readConf(confpath)
 def checkLock(fn):
 	if os.path.exists(fn):
+		print "PID file exists, exiting..."
 		sys.exit(1)
 def getLock(fn):
 	fh = open(fn, 'w')

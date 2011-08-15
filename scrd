@@ -6,15 +6,38 @@
 ## Do as you will.
 ###
 
-import socket, select, signal, os, sys, atexit, re, json
+ver = 2
+
+import socket, select, signal, os, sys, atexit, re, json, getopt
 
 confpath = "/usr/local/etc/scrd.conf"
-if len(sys.argv) > 1: confpath = sys.argv[1]
+#if len(sys.argv) > 1: confpath = sys.argv[1]
 
 sessions = {}
 socks = {}
 conf = {}
 
+def args():
+	global debug, confpath
+	try:
+		opts, args = getopt.gnu_getopt(sys.argv[1:], "dc:v")
+	except getopt.GetoptError, err:
+		print str(err)
+		print "Flags:"
+		print " -d (debug)"
+		print " -v (version)"
+		print " -c <config> (specify config file)"
+		sys.exit(0)
+	debug = False
+	for o, a in opts:
+		if o == "-d":
+			debug = True
+		elif o == "-c":
+			confpath = a
+		elif o == "-v":
+			print "SCRD - Server Check Response Daemon"
+			print "Version %d" % ver
+			sys.exit(0)
 def readConf(fn):
 	lconf = {'procs': [], 'white': []}
 	if not os.path.exists(fn):
@@ -22,8 +45,10 @@ def readConf(fn):
 	fh = open(fn, 'r')
 	lines = fh.readlines()
 	for line in lines:
+		line = line.strip()
+		if line == "": continue
 		if line[0] == "#": continue
-		parts = line.strip().split('#')
+		parts = line.split('#')
 		words = (parts[0]).strip().split(':')
 		words[0] = words[0].strip()
 		words[1] = words[1].strip()
@@ -56,6 +81,7 @@ def put(sock, line, nl=True):
 			except socket.error, err: return err
 		if nl: sock.send("\r\n")
 
+args()
 conf = readConf(confpath)
 checkLock(conf['pidfile'])
 if os.fork() != 0:

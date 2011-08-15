@@ -4,5 +4,12 @@ Installation:
 - Edit scrd.conf to your likings, copy to a directory
  - Default conf-path is /usr/local/etc/scrd.conf
 
-- Run scrd: ./scrd [/path/to/scrd.conf]
+- Run scrd: ./scrd [-c </path/to/scrd.conf>]
  - You can omit the path if it's at /usr/local/etc/scrd.conf
+
+*CHANGELOG*
+VERSION 2
+- Added getopt() - now has options!
+
+VERSION 1
+- Initial code

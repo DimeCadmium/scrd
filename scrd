@@ -6,7 +6,7 @@
 ## Do as you will.
 ###
 
-ver = 2.1
+ver = 2.2
 
 import socket, select, signal, os, sys, atexit, re, json, getopt
 
@@ -18,7 +18,7 @@ socks = {}
 conf = {}
 
 def args():
-	global debug, confpath
+	global debug, confpath, quiet
 	try:
 		opts, args = getopt.gnu_getopt(sys.argv[1:], "dc:v")
 	except getopt.GetoptError, err:
@@ -29,6 +29,7 @@ def args():
 		print " -c <config> (specify config file)"
 		sys.exit(0)
 	debug = False
+	quiet = False
 	for o, a in opts:
 		if o == "-d":
 			debug = True
@@ -63,6 +64,7 @@ def rehash(signum, frm):
 def checkLock(fn):
 	if os.path.exists(fn):
 		print "PID file exists, exiting..."
+		print "(rm %s if I'm wrong)" % fn
 		sys.exit(1)
 def getLock(fn):
 	fh = open(fn, 'w')

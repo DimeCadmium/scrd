@@ -8,10 +8,11 @@ Installation:
  - You can omit the path if it's at /usr/local/etc/scrd.conf
 
 *CHANGELOG*
-VERSION 2.1	Aug5 2011
+VERSION 2.2	Aug15 2011
+- Changed error for PID file to be moar bettar!
+VERSION 2.1	Aug15 2011
 - Error for PID file existing
 - Error for config not existing
-
 VERSION 2	Aug15 2011
 - Added getopt() - now has options!
 

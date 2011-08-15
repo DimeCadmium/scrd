@@ -1,0 +1,186 @@
+#!/usr/bin/python
+
+###
+## scrd - Server Check Response Daemon
+## By DimeCadmium. Copyright 2011 John Runyon.
+## Do as you will.
+###
+
+import socket, select, signal, os, sys, atexit, re, json
+
+confpath = "/usr/local/etc/scrd.conf"
+if len(sys.argv) > 1: confpath = sys.argv[1]
+
+sessions = {}
+socks = {}
+conf = {}
+
+def readConf(fn):
+	lconf = {'procs': [], 'white': []}
+	if not os.path.exists(fn):
+		sys.exit(1)
+	fh = open(fn, 'r')
+	lines = fh.readlines()
+	for line in lines:
+		if line[0] == "#": continue
+		parts = line.strip().split('#')
+		words = (parts[0]).strip().split(':')
+		words[0] = words[0].strip()
+		words[1] = words[1].strip()
+		if words[0] == "proc": lconf['procs'].append(words[1])
+		elif words[0] == "white": lconf['white'].append(words[1])
+		else: lconf[words[0]] = words[1]
+	return lconf
+def rehash(signum, frm):
+	global conf
+	conf = readConf(confpath)
+def checkLock(fn):
+	if os.path.exists(fn):
+		sys.exit(1)
+def getLock(fn):
+	fh = open(fn, 'w')
+	fh.write(str(os.getpid()))
+	fh.close()
+def unLock():
+	ms.close()
+	os.remove(conf['pidfile'])
+def sigHdl(signum, frm):
+	unLock()
+	os._exit(0)
+def put(sock, line, nl=True):
+	if line is not None:
+		if isinstance(line, (list, tuple)):
+			for scalar in line: put(sock, scalar, False)
+		else:
+			try: sock.send(str(line)+"\r\n")
+			except socket.error, err: return err
+		if nl: sock.send("\r\n")
+
+conf = readConf(confpath)
+checkLock(conf['pidfile'])
+if os.fork() != 0:
+	sys.exit(0)
+
+getLock(conf['pidfile'])
+signal.signal(signal.SIGTERM, sigHdl)
+signal.signal(signal.SIGHUP, rehash)
+signal.signal(signal.SIGINT, sigHdl)
+atexit.register(unLock)
+
+poller = select.poll()
+
+ms = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+ms.bind((conf['host'], int(conf['port'])))
+ms.listen(2)
+poller.register(ms, select.POLLIN)
+
+def getHostname():
+	rp = os.popen("/bin/hostname")
+	line = rp.readline()
+	return line.strip()
+def getPS():
+	apps = []
+	run = 0
+	svcs = {}
+	lines = []
+	rp = os.popen("/bin/ps ax -o command=")
+	flines = rp.readlines()
+	for l in flines:
+		lines.append((l.strip().split(' '))[0])
+	for pn in conf['procs']:
+		if pn in lines:
+			svcs[pn] = True
+			run += 1
+		else:
+			svcs[pn] = False
+	dic = {}
+	dic['allps'] = len(lines)
+	dic['runsvc'] = run
+	dic['allsvc'] = len(conf['procs'])
+	dic['svcs'] = svcs
+	return dic
+def getWho():
+	users = {}
+	rp = os.popen("/usr/bin/who -q")
+	line = rp.readline()
+	words = line.strip().split(' ')
+	for v in words:
+		try: users[v] += 1
+		except KeyError: users[v] = 1
+	return users
+def getIPs():
+	ary = []
+	rp = os.popen("/sbin/ifconfig | grep 'inet addr:' | grep -v '127.0.0.1' | cut -d: -f2 | awk '{print $1}'")
+	lines = rp.readlines()
+	for line in lines:
+		ip = line.strip()
+		host = socket.getfqdn(ip)
+		ary.append({'ip': ip, 'host': host})
+	return ary
+def getUptime():
+	rp = os.popen("/usr/bin/uptime")
+	line = rp.readline()
+	sects = line.split(', ', 2)
+	timeuptime = sects[0]
+	textload = sects[2]
+	uptime = (timeuptime.split('up '))[1].strip()
+	loads = (textload.split(': '))[1].split(', ')
+	load1 = float(loads[0].strip())
+	load5 = float(loads[1].strip())
+	load15 = float(loads[2].strip())
+	return {'uptime': uptime, 'load1': load1, 'load5': load5, 'load15': load15}
+def getRAM():
+	rp = os.popen("/usr/bin/free -m")
+	rp.readline()
+	line = rp.readline()
+	words1 = line.split(' ')
+	words = []
+	for w in words1:
+		if w != '': words.append(w)
+	total = int(words[1])
+	used = int(words[2])
+	free = int(words[3])
+	bufcac = int(words[5])+int(words[6])
+	return {'used': used, 'free': free, 'total': total, 'bufcac': bufcac}
+def getDisk():
+	dics = {'single': [], 'total': {}}
+	last = []
+	rp = os.popen("/bin/df -hTP --total")
+	rp.readline()
+	lines = rp.readlines()
+	for l in lines:
+		m = re.match(r"(.+?)\s+([\w\-]+)\s+([\d.]+\w?)\s+([0-9.]+\w?)\s+([0-9.]+\w?)\s+(?:\d+%)\s*(.*)", l).groups()
+		# TYPE:FS:MP:TOTAL:USED:AVAIL
+		if m[5] != '': dics['single'].append({'type': m[1], 'fs': m[0], 'mount': m[5], 'total': m[2], 'used': m[3], 'avail': m[4]})
+		else: dics['total'] = {'avail': m[4], 'used': m[3], 'total': m[2]}
+	return dics
+
+while True:
+	try:
+		readSocks = poller.poll()
+	except select.error:
+		continue
+
+	for fheve in readSocks:
+		fh = fheve[0]
+		if fh == ms.fileno():
+			(ns, addr) = ms.accept()
+			if addr[0] in conf['white']:
+				dic = {}
+				dic["hostname"]	= getHostname()
+				dic["ps"]	= getPS()
+				dic["who"]	= getWho()
+				dic["uplo"]	= getUptime()
+				dic["ram"]	= getRAM()
+				dic["ips"]	= getIPs()
+				dic["disk"]	= getDisk()
+				if conf['pretty'] == "Y":
+					put(ns, json.dumps(dic, indent=4))
+				else:
+					put(ns, json.dumps(dic))
+			else:
+				put(ns, json.dumps({'error': "Unauthorized"}))
+			try:
+				ns.shutdown(socket.SHUT_RDWR)
+				ns.close()
+			except socket.error: pass

@@ -1,0 +1,8 @@
+SCRD - Server Check Response Daemon
+
+Installation:
+- Edit scrd.conf to your likings, copy to a directory
+ - Default conf-path is /usr/local/etc/scrd.conf
+
+- Run scrd: ./scrd [/path/to/scrd.conf]
+ - You can omit the path if it's at /usr/local/etc/scrd.conf

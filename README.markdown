@@ -7,6 +7,9 @@
 - Run scrd: ./scrd [-c </path/to/scrd.conf>]
  - You can omit the path if it's at /usr/local/etc/scrd.conf
 
+## Compatible Programs:
+<https://github.com/cedricd/status>
+
 ## Change Log:
 ### VERSION 2.2
 Aug15 2011

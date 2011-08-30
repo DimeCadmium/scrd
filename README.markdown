@@ -31,7 +31,7 @@ Aug14 2011
 
 ## Output:
 Looks like:
-```json
+```javascript
 {
         "ps": {
                 "runsvc": 1,

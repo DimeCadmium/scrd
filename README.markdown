@@ -31,64 +31,64 @@ Aug14 2011
 
 ## Output:
 Looks like:
-	{
-			"ps": {
-					"runsvc": 1,
-					"allsvc": 1,
-					"svcs": {
-							"/usr/sbin/sshd": true
-					},
-					"allps": 162
-			},
-			"ram": {
-					"total": 3951,
-					"used": 3918,
-					"bufcac": 2095,
-					"free": 33
-			},
-			"uplo": {
-					"load1": 0.029999999999999999,
-					"load15": 0.0,
-					"uptime": "30 days",
-					"load5": 0.01
-			},
-			"hostname": "sub.domain.tld",
-			"who": {
-					"john": 1
-			},
-			"ips": [
-					{
-							"ip": "216.245.223.2",
-							"host": "2-223-245-216.static.reverse.lstn.net"
-					},
-					{
-							"ip": "10.4.25.182",
-							"host": "lsn.local"
-					}
-			],
-			"disk": {
-					"single": [
-							{
-									"fs": "/dev/mapper/unassigned-root",
-									"mount": "/",
-									"avail": "422G",
-									"used": "6.7G",
-									"total": "451G",
-									"type": "ext3"
-							},
-							{
-									"fs": "/dev/sda1",
-									"mount": "/boot",
-									"avail": "187M",
-									"used": "30M",
-									"total": "228M",
-									"type": "ext2"
-							}
-					],
-					"total": {
-							"avail": "426G",
-							"total": "455G",
-							"used": "6.8G"
-					}
-			}
-	}
+	{ 
+			"ps": { 
+					"runsvc": 1, 
+					"allsvc": 1, 
+					"svcs": { 
+							"/usr/sbin/sshd": true 
+					}, 
+					"allps": 162 
+			}, 
+			"ram": { 
+					"total": 3951, 
+					"used": 3918, 
+					"bufcac": 2095, 
+					"free": 33 
+			}, 
+			"uplo": { 
+					"load1": 0.029999999999999999, 
+					"load15": 0.0, 
+					"uptime": "30 days", 
+					"load5": 0.01 
+			}, 
+			"hostname": "sub.domain.tld", 
+			"who": { 
+					"john": 1 
+			}, 
+			"ips": [ 
+					{ 
+							"ip": "216.245.223.2", 
+							"host": "2-223-245-216.static.reverse.lstn.net" 
+					}, 
+					{ 
+							"ip": "10.4.25.182", 
+							"host": "lsn.local" 
+					} 
+			], 
+			"disk": { 
+					"single": [ 
+							{ 
+									"fs": "/dev/mapper/unassigned-root", 
+									"mount": "/", 
+									"avail": "422G", 
+									"used": "6.7G", 
+									"total": "451G", 
+									"type": "ext3" 
+							}, 
+							{ 
+									"fs": "/dev/sda1", 
+									"mount": "/boot", 
+									"avail": "187M", 
+									"used": "30M", 
+									"total": "228M", 
+									"type": "ext2" 
+							} 
+					], 
+					"total": { 
+							"avail": "426G", 
+							"total": "455G", 
+							"used": "6.8G" 
+					} 
+			} 
+	} 

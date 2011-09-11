@@ -62,12 +62,24 @@ def readConf(fn):
 		if line == "": continue
 		if line[0] == "#": continue
 		parts = line.split('#')
-		words = (parts[0]).strip().split(':')
-		words[0] = words[0].strip()
-		words[1] = words[1].strip()
-		if words[0] == "proc": lconf['procs'].append(words[1])
-		elif words[0] == "white": lconf['white'].append(words[1])
-		else: lconf[words[0]] = words[1]
+		words = (parts[0]).strip().split(':', 2)
+		pairtype = words[0].strip()[0]
+		pairkey = words[1].strip()
+		pairval = words[2].strip()
+		if pairtype == 'a':
+			try:
+				lconf[pairkey].append(pairval)
+			except KeyError:
+				lconf[pairkey] = [pairval]
+		elif pairtype == 's':
+				lconf[pairkey] = str(pairval)
+		elif pairtype == 'i':
+				lconf[pairkey] = int(pairval)
+		elif pairtype == 'b':
+				if pairval.upper() != 'N':
+					lconf[pairkey] = True
+				else:
+					lconf[pairkey] = False
 	return lconf
 def rehash(signum, frm):
 	global conf
@@ -222,7 +234,7 @@ while True:
 				dic["ram"]	= getRAM()
 				dic["ips"]	= getIPs()
 				dic["disk"]	= getDisk()
-				if conf['pretty'] == "Y":
+				if conf['pretty']:
 					put(ns, json.dumps(dic, indent=4))
 				else:
 					put(ns, json.dumps(dic))

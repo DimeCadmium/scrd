@@ -35,7 +35,7 @@ def args():
 	except getopt.GetoptError, err:
 		print str(err)
 		print "Flags:"
-		print " -d (debug)"
+#		print " -d (debug)"
 		print " -v (version)"
 		print " -c <config> (specify config file)"
 		sys.exit(0)
@@ -85,8 +85,12 @@ def unLock():
 	ms.close()
 	os.remove(conf['pidfile'])
 def sigHdl(signum, frm):
-	unLock()
-	os._exit(0)
+	if signum == signal.SIGHUP:
+		global conf
+		conf = readConf(confpath)
+	elif signum == signal.SIGINT:
+		unLock()
+		os._exit(0)
 def put(sock, line, nl=True):
 	if line is not None:
 		if isinstance(line, (list, tuple)):
@@ -184,16 +188,19 @@ def getRAM():
 	bufcac = int(words[5])+int(words[6])
 	return {'used': used, 'free': free, 'total': total, 'bufcac': bufcac}
 def getDisk():
-	dics = {'single': [], 'total': {}}
+	dics = {'single': [], 'total': {'avail': 0, 'used': 0, 'total': 0}}
 	last = []
-	rp = os.popen("/bin/df -hTP --total")
+	rp = os.popen("/bin/df -TP")
 	rp.readline()
 	lines = rp.readlines()
 	for l in lines:
 		m = re.match(r"(.+?)\s+([\w\-]+)\s+([\d.]+\w?)\s+([0-9.]+\w?)\s+([0-9.]+\w?)\s+(?:\d+%)\s*(.*)", l).groups()
 		# TYPE:FS:MP:TOTAL:USED:AVAIL
-		if m[5] != '': dics['single'].append({'type': m[1], 'fs': m[0], 'mount': m[5], 'total': m[2], 'used': m[3], 'avail': m[4]})
-		else: dics['total'] = {'avail': m[4], 'used': m[3], 'total': m[2]}
+		dics['single'].append({'type': m[1], 'fs': m[0], 'mount': m[5], 'total': int(m[2]), 'used': int(m[3]), 'avail': int(m[4])})
+	for item in dics['single']:
+		dics['total']['total'] += item['total']
+		dics['total']['used'] += item['used']
+		dics['total']['avail'] += item['avail']
 	return dics
 
 while True:

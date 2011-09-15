@@ -8,7 +8,7 @@
  - You can omit the path if it's at /usr/local/etc/scrd.conf
 
 ## Compatible Programs:
-<https://github.com/cedricd/status>
+<https://github.com/nikkiii/status>
 
 ## Change Log:
 ### VERSION 2.2

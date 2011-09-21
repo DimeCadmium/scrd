@@ -110,7 +110,9 @@ def put(sock, line, nl=True):
 		else:
 			try: sock.send(str(line)+"\r\n")
 			except socket.error, err: return err
-		if nl: sock.send("\r\n")
+		if nl:
+			try: sock.send("\r\n")
+			except socket.error: pass
 
 args()
 conf = readConf(confpath)

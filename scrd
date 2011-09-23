@@ -57,7 +57,6 @@ def args():
 			sys.exit(0)
 
 def old_readConf(fn):
-def readConf(fn):
 	lconf = {'procs': [], 'white': []}
 	if not os.path.exists(fn):
 		print "Config file doesn't exist, exiting..."

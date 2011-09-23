@@ -32,7 +32,7 @@ conf = {}
 def args():
 	global debug, confpath, quiet
 	try:
-		opts, args = getopt.gnu_getopt(sys.argv[1:], "dc:v")
+		opts, args = getopt.gnu_getopt(sys.argv[1:], "dc:C:v")
 	except getopt.GetoptError, err:
 		print str(err)
 		print "Flags:"

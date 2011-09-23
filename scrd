@@ -22,6 +22,7 @@ ver = 2.2
 import socket, select, signal, os, sys, atexit, re, json, getopt
 
 confpath = "/usr/local/etc/scrd.conf"
+old_confpath = "/usr/local/etc/scrd.conf"
 #if len(sys.argv) > 1: confpath = sys.argv[1]
 
 sessions = {}
@@ -38,6 +39,7 @@ def args():
 #		print " -d (debug)"
 		print " -v (version)"
 		print " -c <config> (specify config file)"
+		print " -C <config> (old config format used)"
 		sys.exit(0)
 	debug = False
 	quiet = False
@@ -46,10 +48,36 @@ def args():
 			debug = True
 		elif o == "-c":
 			confpath = a
+		elif o == "-C":
+			confpath = None
+			old_confpath = a
 		elif o == "-v":
 			print "SCRD - Server Check Response Daemon"
 			print "Version %.1f" % ver
 			sys.exit(0)
+
+def old_readConf(fn):
+def readConf(fn):
+	lconf = {'procs': [], 'white': []}
+	if not os.path.exists(fn):
+		print "Config file doesn't exist, exiting..."
+		sys.exit(1)
+	fh = open(fn, 'r')
+	lines = fh.readlines()
+	for line in lines:
+		line = line.strip()
+		if line == "": continue
+		if line[0] == "#": continue
+		parts = line.split('#')
+		words = (parts[0]).strip().split(':')
+		words[0] = words[0].strip()
+		words[1] = words[1].strip()
+		if words[1] == "Y": words[1] = True
+		elif words[1] == "N": words[1] = False
+		if words[0] == "proc": lconf['procs'].append(words[1])
+		elif words[0] == "white": lconf['white'].append(words[1])
+		else: lconf[words[0]] = words[1]
+	return lconf
 def readConf(fn):
 	lconf = {'procs': [], 'white': []}
 	if not os.path.exists(fn):
@@ -115,7 +143,10 @@ def put(sock, line, nl=True):
 			except socket.error: pass
 
 args()
-conf = readConf(confpath)
+if confpath is not None:
+	conf = readConf(confpath)
+else:
+	conf = readConf(old_confpath)
 checkLock(conf['pidfile'])
 if os.fork() != 0:
 	sys.exit(0)

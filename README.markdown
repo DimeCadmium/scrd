@@ -11,6 +11,11 @@
 <https://github.com/nikkiii/status>
 
 ## Change Log:
+### VERSION 3.0
+Sep23 2011
+
+- New config file format; also accepts old config with -C
+
 ### VERSION 2.2
 Aug15 2011
 

@@ -17,7 +17,7 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-ver = 2.2
+ver = 3.0
 
 import socket, select, signal, os, sys, atexit, re, json, getopt
 
@@ -30,7 +30,7 @@ socks = {}
 conf = {}
 
 def args():
-	global debug, confpath, quiet
+	global debug, confpath, old_confpath
 	try:
 		opts, args = getopt.gnu_getopt(sys.argv[1:], "dc:C:v")
 	except getopt.GetoptError, err:
@@ -57,6 +57,7 @@ def args():
 			sys.exit(0)
 
 def old_readConf(fn):
+	print fn
 	lconf = {'procs': [], 'white': []}
 	if not os.path.exists(fn):
 		print "Config file doesn't exist, exiting..."
@@ -145,7 +146,7 @@ args()
 if confpath is not None:
 	conf = readConf(confpath)
 else:
-	conf = readConf(old_confpath)
+	conf = old_readConf(old_confpath)
 checkLock(conf['pidfile'])
 if os.fork() != 0:
 	sys.exit(0)

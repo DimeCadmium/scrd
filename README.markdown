@@ -10,6 +10,12 @@
 ## Compatible Programs:
 <https://github.com/nikkiii/status>
 
+## Python
+If you get an error with the JSON module, compile Python. Follow the instructions in README.python
+
+The error will be similar to: 
+Traceback (most recent call last):   File "./scrd", line 242, in <module>     put(ns, json.dumps(dic)) AttributeError: 'module' object has no attribute 'dumps'
+
 ## Change Log:
 ### VERSION 3.0
 Sep23 2011

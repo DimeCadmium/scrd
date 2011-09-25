@@ -17,12 +17,13 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-ver = 3.0
+ver = 3.1
 
 import socket, select, signal, os, sys, atexit, re, json, getopt
 
 confpath = "/usr/local/etc/scrd.conf"
 old_confpath = "/usr/local/etc/scrd.conf"
+pidfile = None
 #if len(sys.argv) > 1: confpath = sys.argv[1]
 
 sessions = {}
@@ -32,12 +33,13 @@ conf = {}
 def args():
 	global debug, confpath, old_confpath
 	try:
-		opts, args = getopt.gnu_getopt(sys.argv[1:], "dc:C:v")
+		opts, args = getopt.gnu_getopt(sys.argv[1:], "vp:c:C:")
 	except getopt.GetoptError, err:
 		print str(err)
 		print "Flags:"
 #		print " -d (debug)"
 		print " -v (version)"
+		print " -p <path> (PID file)"
 		print " -c <config> (specify config file)"
 		print " -C <config> (old config format used)"
 		sys.exit(0)
@@ -51,6 +53,8 @@ def args():
 		elif o == "-C":
 			confpath = None
 			old_confpath = a
+		elif o == "-p":
+			pidfile = a
 		elif o == "-v":
 			print "SCRD - Server Check Response Daemon"
 			print "Version %.1f" % ver
@@ -77,6 +81,7 @@ def old_readConf(fn):
 		if words[0] == "proc": lconf['procs'].append(words[1])
 		elif words[0] == "white": lconf['white'].append(words[1])
 		else: lconf[words[0]] = words[1]
+	if pidfile is not None: lconf['pidfile'] = pidfile
 	return lconf
 def readConf(fn):
 	lconf = {'procs': [], 'white': []}
@@ -108,6 +113,7 @@ def readConf(fn):
 					lconf[pairkey] = True
 				else:
 					lconf[pairkey] = False
+	if pidfile is not None: lconf['pidfile'] = pidfile
 	return lconf
 def rehash(signum, frm):
 	global conf
@@ -272,7 +278,7 @@ while True:
 				else:
 					put(ns, json.dumps(dic))
 			else:
-				put(ns, json.dumps({'error': "Unauthorized"}))
+				put(ns, json.dumps({'error': "Unauthorized", 'youare': addr[0]}))
 			try:
 				ns.shutdown(socket.SHUT_RDWR)
 				ns.close()

@@ -17,6 +17,12 @@ The error will be similar to:
 Traceback (most recent call last):   File "./scrd", line 242, in <module>     put(ns, json.dumps(dic)) AttributeError: 'module' object has no attribute 'dumps'
 
 ## Change Log:
+### VERSION 3.1
+Sep25 2011
+
+- Fixed random stuff
+- Unauthorized IP now shows the connecter's IP
+
 ### VERSION 3.0
 Sep23 2011
 
